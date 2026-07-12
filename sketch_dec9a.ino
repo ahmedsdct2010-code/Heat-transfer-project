@@ -2,17 +2,15 @@
 #include <LiquidCrystal_I2C.h>
 #include "max6675.h"
 
-// ==================== Pins ====================
-const int PELTIER_HEAT_PIN = 23;        // MOSFET للهوت سايد
-const int PELTIER_COOL_PIN_1 = 33;     // MOSFET للكولد 1
-const int PELTIER_COOL_PIN_2 = 32;     // MOSFET للكولد 2
-const int PELTIER_COOL_PIN_3 = 26;     // MOSFET للكولد 3
+const int PELTIER_HEAT_PIN = 23;    
+const int PELTIER_COOL_PIN_1 = 33; 
+const int PELTIER_COOL_PIN_2 = 32;   
+const int PELTIER_COOL_PIN_3 = 26;   
 
-const int COOLER_FAN_1_PIN = 19;       // مروحة 1
-const int COOLER_FAN_2_PIN = 18;       // مروحة 2
-const int WATER_PUMP_PIN = 27;         // MOSFET للبامب
+const int COOLER_FAN_1_PIN = 19;     
+const int COOLER_FAN_2_PIN = 18;    
+const int WATER_PUMP_PIN = 27;       
 
-// MAX6675 pins
 const int SCK_PIN = 4;
 const int MISO_PIN = 14;
 const int CS_HOT_PART = 13;
@@ -21,7 +19,6 @@ const int SCK_PIN1 = 17;
 const int MISO_PIN1 = 16;
 const int CS_COLD_WATER1 = 5;
 
-// LCD I2C
 const int LCD_SDA_PIN = 32;
 const int LCD_SCL_PIN = 33;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -29,18 +26,16 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 MAX6675 hot_temp(SCK_PIN, CS_HOT_PART, MISO_PIN);
 MAX6675 cold_temp(SCK_PIN1, CS_COLD_WATER1, MISO_PIN1);
 
-// Temp targets
-const float START_TEMP = 50.0;  // درجة الهوت عندها يبدأ التبريد
-const float END_TEMP = 20.0;    // درجة الهوت عندها التبريد ينتهي
+const float START_TEMP = 50.0; 
+const float END_TEMP = 20.0;  
 
 enum SystemState { HEATING, COOLING, FINISHED };
-SystemState state = HEATING; // يبدأ مباشرة عند الباور
+SystemState state = HEATING; 
 
 unsigned long startMillis = 0;
 unsigned long endMillis = 0;
 float coolingTime = 0;
 
-// =============== Helper Functions ===============
 void startHeating() { digitalWrite(PELTIER_HEAT_PIN, HIGH); }
 void stopHeating()  { digitalWrite(PELTIER_HEAT_PIN, LOW); }
 
@@ -49,10 +44,10 @@ void startCooling() {
   digitalWrite(PELTIER_COOL_PIN_2, HIGH);
   digitalWrite(PELTIER_COOL_PIN_3, HIGH);
 
-  digitalWrite(COOLER_FAN_1_PIN, HIGH);  // تشغيل المراوح
+  digitalWrite(COOLER_FAN_1_PIN, HIGH);  
   digitalWrite(COOLER_FAN_2_PIN, HIGH);
 
-  digitalWrite(WATER_PUMP_PIN, HIGH);    // تشغيل البامب
+  digitalWrite(WATER_PUMP_PIN, HIGH);    
 }
 
 void stopCooling() {
@@ -60,9 +55,9 @@ void stopCooling() {
   digitalWrite(PELTIER_COOL_PIN_2, LOW);
   digitalWrite(PELTIER_COOL_PIN_3, LOW);
 
-  digitalWrite(COOLER_FAN_1_PIN, LOW);   // إيقاف المراوح
+  digitalWrite(COOLER_FAN_1_PIN, LOW);   
   digitalWrite(COOLER_FAN_2_PIN, LOW);
-  digitalWrite(WATER_PUMP_PIN, LOW);     // إيقاف البامب
+  digitalWrite(WATER_PUMP_PIN, LOW);    
 }
 
 void stopAll() {
@@ -70,7 +65,6 @@ void stopAll() {
   stopCooling();
 }
 
-// ==================== LCD Update ====================
 void updateLCD(float hotT, float coldT) {
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -89,7 +83,6 @@ void updateLCD(float hotT, float coldT) {
   }
 }
 
-// ==================== Setup ====================
 void setup() {
   Serial.begin(115200);
 
@@ -115,12 +108,11 @@ void setup() {
   lcd.clear();
 }
 
-// ==================== Main Loop ====================
 void loop() {
   float hot = hot_temp.readCelsius();
   float cold = cold_temp.readCelsius();
 
-  // --- State Machine ---
+
   if (state == HEATING) {
     startHeating();
     stopCooling();
@@ -150,7 +142,6 @@ void loop() {
 
   updateLCD(hot, cold);
 
-  // Serial monitor readings
   Serial.print("Hot = ");
   Serial.print(hot);
   Serial.print(" | Cold = ");
